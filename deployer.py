@@ -17,26 +17,37 @@ class BadConfigurationError(Exception):
     pass
 
 def run():
-    with open('configs.yaml') as f:
-        configs = yaml.load(f.read())
+    try:
+        with open('local.configs.yaml') as f:
+            configs = yaml.load(f.read())
+    except:
+        with open('configs.yaml') as f:
+            configs = yaml.load(f.read())
+
     ensure_necessary_configs_are_set(configs)
 
     #setting some variables based on configs
     new_proj = os.path.join(configs['project_root'], configs['install_name'])
     code_src = os.path.join(new_proj, configs['git']['name'])
     virtualenv_path = os.path.join(new_proj, 'project_env')
-    apache_dir = os.path.join(new_proj, 'apache')
+    nginx_dir = os.path.join(new_proj, 'nginx')
     log_dir = os.path.join(new_proj, 'logs')
-    wsgi_file_path = os.path.join(apache_dir, 'environment.wsgi')
+    etc_init_dir = os.path.join(new_proj, 'etc', 'init')
+    wsgi_file_path = os.path.join(code_src, 'gunicorn__cfg.py')
+    gunicorn_script = os.path.join(code_src, 'run_gunicorn.sh')
+    gunicorn_pid = os.path.join(new_proj, 'pid', 'gunicorn.pid')
     error_log = os.path.join(log_dir, 'error_log.log')
     access_log = os.path.join(log_dir, 'access_log.log')
+    gunicorn_log = os.path.join(log_dir, 'gunicorn_log.log')
     static_dir = os.path.join(new_proj, configs['git']['name'], 'static')
     make_directory(new_proj)
     os.chdir(new_proj)
     call(["virtualenv", "--no-site-packages", "project_env"])
-    make_subdirectories(new_proj, 
-        ["apache", "backups", "logs"]
-        )
+    make_subdirectories(
+        new_proj,
+        ["nginx", "backups", "logs", "etc", "pid"]
+    )
+    make_subdirectories(os.path.join(new_proj, 'etc'), ['init'])
     pull_code(new_proj, configs['git'])
 
     # a dict used to replace valuesin the skeleton files.
@@ -52,9 +63,13 @@ def run():
         'WSGI_FILE': wsgi_file_path,
         'ERROR_LOG': error_log,
         'ACCESS_LOG': access_log,
-        'APACHE_DIR': apache_dir,
+        'NGINX_DIR': nginx_dir,
         'SERVER_USER': configs['server_user'],
         'PYTHON_VERSION': configs['python_version'],
+        'GUNICORN_SHELL_SCRIPT': gunicorn_script,
+        'GUNICORN_PID': gunicorn_pid,
+        'GUNICORN_LOG': gunicorn_log,
+        'GUNICORN_CFGFILE': wsgi_file_path,
     }
     def copy_skeleton_to_path(src_dir, dest_dir, file_name, substitutions):
         src = os.path.join(src_dir, file_name)
@@ -68,8 +83,10 @@ def run():
                 skel_txt = substitute_text(key, val, skel_txt)
             f.write(skel_txt)
             skel.close()
-    copy_skeleton_to_path(SKELETON_DIR, apache_dir, 'environment.wsgi', file_var_replacements)
-    copy_skeleton_to_path(SKELETON_DIR, apache_dir, 'site.conf', file_var_replacements)
+    copy_skeleton_to_path(SKELETON_DIR, code_src, 'gunicorn_cfg.py', file_var_replacements)
+    copy_skeleton_to_path(SKELETON_DIR, code_src, 'run_gunicorn.sh', file_var_replacements)
+    copy_skeleton_to_path(SKELETON_DIR, etc_init_dir, 'gunicorn-formhub.conf', file_var_replacements)
+    copy_skeleton_to_path(SKELETON_DIR, nginx_dir, 'site.conf', file_var_replacements)
 
 def ensure_necessary_configs_are_set(configs):
     if configs['hostname'] == "www.example.com":
