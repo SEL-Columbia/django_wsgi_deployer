@@ -31,8 +31,10 @@ def run():
     code_src = os.path.join(new_proj, configs['git']['name'])
     virtualenv_path = os.path.join(new_proj, 'project_env')
     nginx_dir = os.path.join(new_proj, 'nginx')
+    celery_dir = os.path.join(new_proj, 'celery')
     log_dir = os.path.join(new_proj, 'logs')
     etc_init_dir = os.path.join(new_proj, 'etc', 'init')
+    etc_default_dir = os.path.join(new_proj, 'etc', 'default')
     wsgi_file_path = os.path.join(code_src, 'gunicorn_cfg.py')
     gunicorn_script = os.path.join(code_src, 'run_gunicorn.sh')
     gunicorn_pid = os.path.join(new_proj, 'pid', 'gunicorn.pid')
@@ -45,9 +47,9 @@ def run():
     call(["virtualenv", "--no-site-packages", "project_env"])
     make_subdirectories(
         new_proj,
-        ["nginx", "backups", "logs", "etc", "pid"]
+        ["nginx", "backups", "logs", "etc", "pid", "celery"]
     )
-    make_subdirectories(os.path.join(new_proj, 'etc'), ['init'])
+    make_subdirectories(os.path.join(new_proj, 'etc'), ['init', 'default'])
     pull_code(new_proj, configs['git'])
 
     # a dict used to replace valuesin the skeleton files.
@@ -61,6 +63,7 @@ def run():
         'SERVER_NAME': configs['hostname'],
         'ADMIN_EMAIL': configs['admin_email'],
         'WSGI_FILE': wsgi_file_path,
+        'LOGDIR': log_dir,
         'ERROR_LOG': error_log,
         'ACCESS_LOG': access_log,
         'NGINX_DIR': nginx_dir,
@@ -87,7 +90,9 @@ def run():
     copy_skeleton_to_path(SKELETON_DIR, code_src, 'run_gunicorn.sh', file_var_replacements)
     copy_skeleton_to_path(SKELETON_DIR, code_src, 'local_settings.py`', file_var_replacements)
     copy_skeleton_to_path(SKELETON_DIR, etc_init_dir, 'gunicorn-formhub.conf', file_var_replacements)
+    copy_skeleton_to_path(os.path.join(SKELETON_DIR, 'default'), etc_default_dir, 'celeryd', file_var_replacements)
     copy_skeleton_to_path(SKELETON_DIR, nginx_dir, 'site.conf', file_var_replacements)
+    copy_skeleton_to_path(SKELETON_DIR, celery_dir, 'celeryd', file_var_replacements)
 
 def ensure_necessary_configs_are_set(configs):
     if configs['hostname'] == "www.example.com":
