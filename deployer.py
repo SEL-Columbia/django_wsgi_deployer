@@ -33,7 +33,7 @@ def run():
     nginx_dir = os.path.join(new_proj, 'nginx')
     log_dir = os.path.join(new_proj, 'logs')
     etc_init_dir = os.path.join(new_proj, 'etc', 'init')
-    wsgi_file_path = os.path.join(code_src, 'gunicorn__cfg.py')
+    wsgi_file_path = os.path.join(code_src, 'gunicorn_cfg.py')
     gunicorn_script = os.path.join(code_src, 'run_gunicorn.sh')
     gunicorn_pid = os.path.join(new_proj, 'pid', 'gunicorn.pid')
     error_log = os.path.join(log_dir, 'error_log.log')
