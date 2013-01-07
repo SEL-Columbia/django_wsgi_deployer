@@ -13,6 +13,6 @@ cd !PROJ_DIR!
 source !VROOT!/bin/activate
 test -d $LOGDIR || mkdir -p $LOGDIR
 test -d $PIDDIR || mkdir -p $PIDDIR
-exec run-program gunicorn_django -c $GUNICORN_CFGFILE\
+exec gunicorn_django -c $GUNICORN_CFGFILE\
     --user=$USER --group=$GROUP --log-level=debug --pid=$PIDFILE\
     --log-file=$LOGFILE 2>>$LOGFILE
