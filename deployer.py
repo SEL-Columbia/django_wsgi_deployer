@@ -88,7 +88,7 @@ def run():
             skel.close()
     copy_skeleton_to_path(SKELETON_DIR, code_src, 'gunicorn_cfg.py', file_var_replacements)
     copy_skeleton_to_path(SKELETON_DIR, code_src, 'run_gunicorn.sh', file_var_replacements)
-    copy_skeleton_to_path(SKELETON_DIR, code_src, 'local_settings.py`', file_var_replacements)
+    copy_skeleton_to_path(SKELETON_DIR, code_src, 'local_settings.py', file_var_replacements)
     copy_skeleton_to_path(SKELETON_DIR, etc_init_dir, 'gunicorn-formhub.conf', file_var_replacements)
     copy_skeleton_to_path(os.path.join(SKELETON_DIR, 'default'), etc_default_dir, 'celeryd', file_var_replacements)
     copy_skeleton_to_path(SKELETON_DIR, nginx_dir, 'site.conf', file_var_replacements)
